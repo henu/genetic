@@ -3,11 +3,16 @@ var camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHei
 
 var renderer = new THREE.WebGLRenderer();
 renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.setClearColor(0xffffff);
+renderer.shadowMapEnabled = true;
+renderer.shadowMapType = THREE.PCFSoftShadowMap;
 document.body.appendChild(renderer.domElement);
 
 // Sun
 var sun = new THREE.DirectionalLight(0xffffff, 1);
-sun.position.set(0, 1, 0);
+sun.castShadow = true;
+sun.shadowDarkness = 1;
+sun.position.set(20, 100, 30);
 scene.add(sun);
 
 // Ambient light
@@ -18,20 +23,24 @@ scene.add(ambient_light);
 var geometry = new THREE.BoxGeometry(1, 1, 1);
 var material = new THREE.MeshLambertMaterial({ color: 0x00ff00 });
 var cube = new THREE.Mesh(geometry, material);
-cube.position.y = 2;
+cube.castShadow = true;
+cube.receiveShadow = true;
+cube.position.y = 1;
 scene.add(cube);
 
 // Ground
 var ground_geom = new THREE.PlaneGeometry(50, 50);
 var ground_mat = new THREE.MeshLambertMaterial({color: 0xffffff});
 var ground = new THREE.Mesh(ground_geom, ground_mat);
+ground.castShadow = false;
+ground.receiveShadow = true;
 ground.rotation.x = -Math.PI / 2;
 ground.matrixAutoUpdate = false;
 ground.updateMatrix();
 scene.add(ground);
 
-camera.position.z = 5;
-camera.position.y = 2;
+camera.position.z = 3;
+camera.position.y = 1;
 
 function render()
 {
