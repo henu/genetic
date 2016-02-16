@@ -17,11 +17,14 @@ Genetic.scene.add(ground);
 Genetic.camera.position.z = 3;
 Genetic.camera.position.y = 1;
 
+Genetic.phase = 0;
+
 // Some test structures
 node1 = new Genetic.Node(0, 1, 0, Genetic.scene);
 node2 = new Genetic.Node(0, 2, 0.1, Genetic.scene);
 node3 = new Genetic.Node(0.8, 1.5, 0, Genetic.scene);
 line1 = new Genetic.Line(node1, node2, Genetic.scene);
+line1.setMuscle(1, 0, Genetic.phase);
 line2 = new Genetic.Line(node2, node3, Genetic.scene);
 line3 = new Genetic.Line(node3, node1, Genetic.scene);
 Genetic.nodes = [];
@@ -37,13 +40,16 @@ Genetic.render = function()
 {
     for (var line_i = 0; line_i < Genetic.lines.length; ++ line_i) {
         var line = Genetic.lines[line_i];
-        line.updateMatrix();
+        line.updateMatrix(Genetic.phase);
     }
 
     requestAnimationFrame(Genetic.render);
     Genetic.renderer.render(Genetic.scene, Genetic.camera);
 
-    Genetic.runNodes(1 / 60);
+    var deltatime = 1 / 60;
+    Genetic.runNodes(deltatime);
+    Genetic.runLines(Genetic.phase);
+    Genetic.phase += deltatime;
 }
 
 Genetic.runNodes = function(deltatime)
@@ -52,9 +58,13 @@ Genetic.runNodes = function(deltatime)
         var node = Genetic.nodes[node_i];
         node.run(deltatime);
     }
+}
+
+Genetic.runLines = function(phase)
+{
     for (var line_i = 0; line_i < Genetic.lines.length; ++ line_i) {
         var line = Genetic.lines[line_i];
-        line.run();
+        line.run(phase);
     }
 }
 

@@ -68,9 +68,24 @@ Genetic.Line = function(node1, node2, scene)
     this.mesh.receiveShadow = true;
     this.mesh.matrixAutoUpdate = false;
     scene.add(this.mesh);
+
+    this.muscle_freq = -1;
+    this.muscle_phase = 0;
 }
 
-Genetic.Line.prototype.updateMatrix = function()
+Genetic.Line.prototype.setMuscle = function(frequency, phase, phase_now)
+{
+    this.muscle_freq = frequency;
+    this.muscle_phase = phase;
+
+    // Setting Line muscle means its length should be longer or
+    // shorter at current phase. Because of this, its default
+    // length needs to be recalculated.
+    var muscle_stretch = this.getMuscleStretch(phase_now);
+    this.length /= muscle_stretch;
+}
+
+Genetic.Line.prototype.updateMatrix = function(phase)
 {
     var p1 = this.node1.getPosition();
     var p2 = this.node2.getPosition();
@@ -91,7 +106,7 @@ Genetic.Line.prototype.updateMatrix = function()
     this.mesh.matrix.multiply(Genetic.Line.tmp_mat1)
 
     // Set correct length
-    Genetic.Line.tmp_mat1.makeScale(1, this.length, 1);
+    Genetic.Line.tmp_mat1.makeScale(1, this.getDesiredLength(phase), 1);
     this.mesh.matrix.multiply(Genetic.Line.tmp_mat1)
 
     // Make it grow up from origin
@@ -99,7 +114,7 @@ Genetic.Line.prototype.updateMatrix = function()
     this.mesh.matrix.multiply(Genetic.Line.tmp_mat1)
 }
 
-Genetic.Line.prototype.run = function()
+Genetic.Line.prototype.run = function(phase)
 {
     var length_now = this.node1.getPosition().distanceTo(this.node2.getPosition());
     if (length_now > 0.001) {
@@ -107,7 +122,7 @@ Genetic.Line.prototype.run = function()
         var diff_y = this.node2.getPosition().y - this.node1.getPosition().y;
         var diff_z = this.node2.getPosition().z - this.node1.getPosition().z;
 
-        var fix = (length_now - this.length) / length_now / 2;
+        var fix = (length_now - this.getDesiredLength(phase)) / length_now / 2;
         if (Math.abs(fix) > 0.001) {
             var fix_x = diff_x * fix;
             var fix_y = diff_y * fix;
@@ -120,6 +135,23 @@ Genetic.Line.prototype.run = function()
             this.node2.getPosition().z -= fix_z;
         }
     }
+}
+
+Genetic.Line.prototype.getDesiredLength = function(phase)
+{
+    // If there is no muscle here
+    if (this.muscle_freq < 0) {
+        return this.length;
+    }
+
+    var muscle_stretch = this.getMuscleStretch(phase);
+    return this.length * muscle_stretch;
+}
+
+Genetic.Line.prototype.getMuscleStretch = function(phase)
+{
+    var relative_phase = phase * this.muscle_freq + this.muscle_phase;
+    return 1 + 0.5 * Math.sin(relative_phase * Math.PI * 2);
 }
 
 Genetic.Line.radius = 0.075;
