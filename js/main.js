@@ -3,15 +3,6 @@ var Genetic = Genetic || {};
 Genetic.setupSceneCameraAndRenderer();
 Genetic.setupLights();
 
-// Test cube
-var geometry = new THREE.BoxGeometry(1, 1, 1);
-var material = new THREE.MeshLambertMaterial({ color: 0x00ff00 });
-var cube = new THREE.Mesh(geometry, material);
-cube.castShadow = true;
-cube.receiveShadow = true;
-cube.position.y = 1;
-Genetic.scene.add(cube);
-
 // Ground
 var ground_geom = new THREE.PlaneGeometry(50, 50);
 var ground_mat = new THREE.MeshLambertMaterial({color: 0xffffff});
@@ -26,13 +17,31 @@ Genetic.scene.add(ground);
 Genetic.camera.position.z = 3;
 Genetic.camera.position.y = 1;
 
+// Some test structures
+node1 = new Genetic.Node(0, 1, 0, Genetic.scene);
+node2 = new Genetic.Node(0, 2, 0, Genetic.scene);
+node3 = new Genetic.Node(0.8, 1.5, 0, Genetic.scene);
+Genetic.nodes = [];
+Genetic.nodes.push(node1);
+Genetic.nodes.push(node2);
+Genetic.nodes.push(node3);
+
+Genetic.clock = new THREE.Clock(true);
+
 Genetic.render = function()
 {
     requestAnimationFrame(Genetic.render);
     Genetic.renderer.render(Genetic.scene, Genetic.camera);
 
-    cube.rotation.x += 0.01;
-    cube.rotation.y += 0.01;
+    Genetic.runNodes(Genetic.clock.getDelta());
+}
+
+Genetic.runNodes = function(deltatime)
+{
+    for (var node_i = 0; node_i < Genetic.nodes.length; ++ node_i) {
+        var node = Genetic.nodes[node_i];
+        node.run(deltatime);
+    }
 }
 
 Genetic.render();
