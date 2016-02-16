@@ -150,7 +150,7 @@ Genetic.Line.prototype.run = function(phase, nodes, scene)
                 // Break one of the nodes. Use random selection
                 // if both are still connected to other lines.
                 if (this.node2.lines_connected <= 1 || (this.node1.lines_connected > 1 && Math.random() < 0.5)) {
-                    var new_node = node1.copy(scene);
+                    var new_node = this.node1.copy(scene);
                     -- this.node1.lines_connected;
                     nodes.push(new_node);
                     this.node1 = new_node;
@@ -160,7 +160,7 @@ Genetic.Line.prototype.run = function(phase, nodes, scene)
                     this.node1.getPosition().y += fix_y * 2;
                     this.node1.getPosition().z += fix_z * 2;
                 } else {
-                    var new_node = node2.copy(scene);
+                    var new_node = this.node2.copy(scene);
                     -- this.node2.lines_connected;
                     nodes.push(new_node);
                     this.node2 = new_node;
