@@ -19,22 +19,12 @@ Genetic.camera.position.y = 1;
 
 Genetic.phase = 0;
 
-// Some test structures
-node1 = new Genetic.Node(0, 1, 0, Genetic.scene);
-node2 = new Genetic.Node(0, 2, 0.1, Genetic.scene);
-node3 = new Genetic.Node(0.8, 1.5, 0, Genetic.scene);
-line1 = new Genetic.Line(node1, node2, Genetic.scene);
-line1.setMuscle(1, 0, Genetic.phase);
-line2 = new Genetic.Line(node2, node3, Genetic.scene);
-line3 = new Genetic.Line(node3, node1, Genetic.scene);
 Genetic.nodes = [];
-Genetic.nodes.push(node1);
-Genetic.nodes.push(node2);
-Genetic.nodes.push(node3);
 Genetic.lines = [];
-Genetic.lines.push(line1);
-Genetic.lines.push(line2);
-Genetic.lines.push(line3);
+
+// Test organism
+var organism = new Genetic.Organism(null, 0);
+organism.createNodesAndLines(0, 0, 0, Genetic.scene, Genetic.nodes, Genetic.lines, Genetic.phase);
 
 Genetic.render = function()
 {
