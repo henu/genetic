@@ -33,8 +33,6 @@ Genetic.lines.push(line1);
 Genetic.lines.push(line2);
 Genetic.lines.push(line3);
 
-Genetic.clock = new THREE.Clock(true);
-
 Genetic.render = function()
 {
     for (var line_i = 0; line_i < Genetic.lines.length; ++ line_i) {
@@ -45,7 +43,7 @@ Genetic.render = function()
     requestAnimationFrame(Genetic.render);
     Genetic.renderer.render(Genetic.scene, Genetic.camera);
 
-    Genetic.runNodes(Genetic.clock.getDelta());
+    Genetic.runNodes(1 / 60);
 }
 
 Genetic.runNodes = function(deltatime)
