@@ -33,14 +33,6 @@ Genetic.Node.prototype.run = function(deltatime)
     // Add gravity
     velocity_y -= 9.81 * deltatime;
 
-    // Make sure node will not fall through the ground
-    if (this.mesh.position.y < Genetic.Node.radius) {
-        this.mesh.position.y = Genetic.Node.radius;
-        velocity_y = -velocity_y * Genetic.Node.bounciness;
-        velocity_x *= Genetic.Node.bounciness;
-        velocity_z *= Genetic.Node.bounciness;
-    }
-
     // Store last position
     this.last_pos.x = this.mesh.position.x;
     this.last_pos.y = this.mesh.position.y;
@@ -50,6 +42,19 @@ Genetic.Node.prototype.run = function(deltatime)
     this.mesh.position.x += velocity_x * deltatime;
     this.mesh.position.y += velocity_y * deltatime;
     this.mesh.position.z += velocity_z * deltatime;
+
+    // Make sure node will not fall through the ground
+    if (this.mesh.position.y < Genetic.Node.radius) {
+        this.mesh.position.y = Genetic.Node.radius;
+        velocity_y = -velocity_y * Genetic.Node.bounciness;
+        velocity_x *= Genetic.Node.bounciness;
+        velocity_z *= Genetic.Node.bounciness;
+        // Because velocity will be lost after we exit from this function,
+        // we modify last position to keep the effects of bouncing.
+        this.last_pos.x = this.mesh.position.x - velocity_x * deltatime;
+        this.last_pos.y = this.mesh.position.y - velocity_y * deltatime;
+        this.last_pos.z = this.mesh.position.z - velocity_z * deltatime;
+    }
 }
 
 Genetic.Line = function(node1, node2, scene)
