@@ -11,6 +11,8 @@ Genetic.Node = function(x, y, z, scene)
     this.mesh.position.y = y;
     this.mesh.position.z = z;
     scene.add(this.mesh);
+
+    this.lines_connected = 0;
 }
 
 Genetic.Node.radius = 0.1;
@@ -21,6 +23,15 @@ Genetic.Node.bounciness = 0.1;
 Genetic.Node.prototype.getPosition = function()
 {
     return this.mesh.position;
+}
+
+Genetic.Node.prototype.copy = function(scene)
+{
+    var result = new Genetic.Node(this.mesh.position.x, this.mesh.position.y, this.mesh.position.z, scene)
+    result.last_pos.x = this.last_pos.x;
+    result.last_pos.y = this.last_pos.y;
+    result.last_pos.z = this.last_pos.z;
+    return result;
 }
 
 Genetic.Node.prototype.run = function(deltatime)
@@ -62,6 +73,9 @@ Genetic.Line = function(node1, node2, scene)
     this.node1 = node1;
     this.node2 = node2;
     this.length = node1.getPosition().distanceTo(node2.getPosition());
+
+    ++ node1.lines_connected;
+    ++ node2.lines_connected;
 
     this.mesh = new THREE.Mesh(Genetic.Line.geom, Genetic.Line.mat);
     this.mesh.castShadow = true;
@@ -114,8 +128,10 @@ Genetic.Line.prototype.updateMatrix = function(phase)
     this.mesh.matrix.multiply(Genetic.Line.tmp_mat1)
 }
 
-Genetic.Line.prototype.run = function(phase)
+Genetic.Line.prototype.run = function(phase, nodes, scene)
 {
+    var BREAK_THRESHOLD = 0.075;
+
     var length_now = this.node1.getPosition().distanceTo(this.node2.getPosition());
     if (length_now > 0.001) {
         var diff_x = this.node2.getPosition().x - this.node1.getPosition().x;
@@ -127,12 +143,41 @@ Genetic.Line.prototype.run = function(phase)
             var fix_x = diff_x * fix;
             var fix_y = diff_y * fix;
             var fix_z = diff_z * fix;
-            this.node1.getPosition().x += fix_x;
-            this.node1.getPosition().y += fix_y;
-            this.node1.getPosition().z += fix_z;
-            this.node2.getPosition().x -= fix_x;
-            this.node2.getPosition().y -= fix_y;
-            this.node2.getPosition().z -= fix_z;
+
+            // If fix is too big, then break line
+            var fix_len = Math.sqrt(fix_x*fix_x + fix_y*fix_y + fix_z*fix_z);
+            if (fix_len > BREAK_THRESHOLD && (this.node1.lines_connected > 1 || this.node2.lines_connected > 1)) {
+                // Break one of the nodes. Use random selection
+                // if both are still connected to other lines.
+                if (this.node2.lines_connected <= 1 || (this.node1.lines_connected > 1 && Math.random() < 0.5)) {
+                    var new_node = node1.copy(scene);
+                    -- this.node1.lines_connected;
+                    nodes.push(new_node);
+                    this.node1 = new_node;
+                    new_node.lines_connected = 1;
+
+                    this.node1.getPosition().x += fix_x * 2;
+                    this.node1.getPosition().y += fix_y * 2;
+                    this.node1.getPosition().z += fix_z * 2;
+                } else {
+                    var new_node = node2.copy(scene);
+                    -- this.node2.lines_connected;
+                    nodes.push(new_node);
+                    this.node2 = new_node;
+                    new_node.lines_connected = 1;
+
+                    this.node2.getPosition().x -= fix_x * 2;
+                    this.node2.getPosition().y -= fix_y * 2;
+                    this.node2.getPosition().z -= fix_z * 2;
+                }
+            } else {
+                this.node1.getPosition().x += fix_x;
+                this.node1.getPosition().y += fix_y;
+                this.node1.getPosition().z += fix_z;
+                this.node2.getPosition().x -= fix_x;
+                this.node2.getPosition().y -= fix_y;
+                this.node2.getPosition().z -= fix_z;
+            }
         }
     }
 }

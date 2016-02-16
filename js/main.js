@@ -64,7 +64,7 @@ Genetic.runLines = function(phase)
 {
     for (var line_i = 0; line_i < Genetic.lines.length; ++ line_i) {
         var line = Genetic.lines[line_i];
-        line.run(phase);
+        line.run(phase, Genetic.nodes, Genetic.scene);
     }
 }
 
